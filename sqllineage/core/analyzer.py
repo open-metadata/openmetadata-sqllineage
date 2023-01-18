@@ -11,6 +11,8 @@ from sqlparse.sql import (
     Where,
 )
 
+
+
 from sqllineage.core.handlers.base import (
     CurrentTokenBaseHandler,
     NextTokenBaseHandler,
