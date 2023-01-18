@@ -45,7 +45,7 @@ setup(
     version=VERSION,
     url="https://github.com/open-metadata/openmetadata-sqllineage",
     author="OpenMetadata Committers",
-    description="OpenMetadata SQL Lineage for Analysis Tool powered by Python and sqlfluff",
+    description="OpenMetadata SQL Lineage for Analysis Tool powered by Python and sqlfluff based on sqllineage.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=("tests",)),
