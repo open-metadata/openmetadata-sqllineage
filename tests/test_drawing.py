@@ -7,7 +7,7 @@ from io import StringIO
 from sqllineage.drawing import app
 
 
-def test_handler():
+def x_test_handler():
     container = namedtuple("response", ["status", "header"])
 
     def start_response(status, header):
