@@ -24,7 +24,7 @@ class EggInfoWithJS(egg_info):
     """
 
     def run(self) -> None:
-        static_path = os.path.join(NAME, STATIC_FOLDER)
+        static_path = os.path.join("sqllineage", STATIC_FOLDER)
         if os.path.exists(static_path) or "READTHEDOCS" in os.environ:
             pass
         else:
