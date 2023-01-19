@@ -143,6 +143,6 @@ class TargetHandler(ConditionalSegmentBaseHandler):
             return retrieve_holder_data_from(
                 object_reference.segments,
                 holder,
-                object_reference.get_child("identifier"),
+                get_child(object_reference, "identifier"),
             )
         return None
