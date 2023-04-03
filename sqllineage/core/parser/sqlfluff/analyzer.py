@@ -9,7 +9,7 @@ from sqllineage.core.models import AnalyzerContext
 from sqllineage.core.parser.sqlfluff.extractors.lineage_holder_extractor import (
     LineageHolderExtractor,
 )
-from sqllineage.core.parser.sqlfluff.utils.sqlfluff import (
+from sqllineage.core.parser.sqlfluff.utils import (
     clean_parentheses,
     get_statement_segment,
     is_subquery_statement,
@@ -40,24 +40,33 @@ class SqlFluffLineageAnalyzer(LineageAnalyzer):
             extractor_cls(self._dialect)
             for extractor_cls in LineageHolderExtractor.__subclasses__()
         ]
-        if statement_segment and any(
-            extractor.can_extract(statement_segment.type) for extractor in extractors
-        ):
-            if "unparsable" in statement_segment.descendant_type_set:
-                raise InvalidSyntaxException(
-                    f"SQLLineage cannot parse the statement properly, please check potential syntax error for SQL:"
-                    f"{sql}"
-                )
-        else:
-            raise UnsupportedStatementException(
-                f"SQLLineage doesn't support analyzing statement type [{statement_segment.type}] for SQL:"
+        if statement_segment.type == "unparsable":
+            raise InvalidSyntaxException(
+                f"This SQL statement is unparsable, please check potential syntax error for SQL:"
                 f"{sql}"
             )
-        lineage_holder = SubQueryLineageHolder()
-        for extractor in extractors:
-            if extractor.can_extract(statement_segment.type):
-                lineage_holder = extractor.extract(
-                    statement_segment, AnalyzerContext(), is_sub_query
+        else:
+            if any(
+                extractor.can_extract(statement_segment.type)
+                for extractor in extractors
+            ):
+                if "unparsable" in statement_segment.descendant_type_set:
+                    raise InvalidSyntaxException(
+                        f"{statement_segment.type} is partially unparsable, "
+                        f"please check potential syntax error for SQL:"
+                        f"{sql}"
+                    )
+                else:
+                    lineage_holder = SubQueryLineageHolder()
+                    for extractor in extractors:
+                        if extractor.can_extract(statement_segment.type):
+                            lineage_holder = extractor.extract(
+                                statement_segment, AnalyzerContext(), is_sub_query
+                            )
+                            break
+                    return StatementLineageHolder.of(lineage_holder)
+            else:
+                raise UnsupportedStatementException(
+                    f"SQLLineage doesn't support analyzing statement type [{statement_segment.type}] for SQL:"
+                    f"{sql}"
                 )
-                break
-        return StatementLineageHolder.of(lineage_holder)
