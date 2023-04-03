@@ -110,5 +110,6 @@ class SourceHandler(SourceHandlerMixin, NextTokenBaseHandler):
     def _add_dataset_from_identifier(
         self, identifier: Identifier, holder: SubQueryLineageHolder
     ) -> None:
-        if dataset := get_dataset_from_identifier(identifier, holder):
+        dataset = get_dataset_from_identifier(identifier, holder)
+        if dataset:
             self.tables.append(dataset)

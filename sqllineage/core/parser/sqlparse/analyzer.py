@@ -127,7 +127,8 @@ class SqlParseLineageAnalyzer(LineageAnalyzer):
                 if isinstance(token, Identifier):
                     direct_source = get_dataset_from_identifier(token, holder)
                     holder.add_read(direct_source)
-                    if subqueries := cls.parse_subquery(token):
+                    subqueries = cls.parse_subquery(token)
+                    if subqueries:
                         for sq in subqueries:
                             holder |= cls._extract_from_dml(
                                 sq.query, AnalyzerContext(sq, holder.cte)
@@ -142,7 +143,8 @@ class SqlParseLineageAnalyzer(LineageAnalyzer):
                         t for t in token.get_identifiers() if isinstance(t, Comparison)
                     ]
                 for c in comparisons:
-                    if isinstance(right := c.right, Identifier):
+                    right = c.right
+                    if isinstance(right, Identifier):
                         src_col = Column(right.get_real_name())
                         src_col.parent = direct_source
                         tgt_col = Column(c.left.get_real_name())

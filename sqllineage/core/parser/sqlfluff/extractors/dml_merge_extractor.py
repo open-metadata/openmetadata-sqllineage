@@ -72,9 +72,8 @@ class DmlMergeExtractor(LineageHolderExtractor):
         for match in get_grandchildren(
             statement, "merge_match", "merge_when_matched_clause"
         ):
-            if (
-                merge_update_clause := match.get_child("merge_update_clause")
-            ) is not None:
+            merge_update_clause = match.get_child("merge_update_clause")
+            if merge_update_clause is not None:
                 for set_clause in get_grandchildren(
                     merge_update_clause, "set_clause_list", "set_clause"
                 ):
@@ -101,7 +100,8 @@ class DmlMergeExtractor(LineageHolderExtractor):
                 .get_child("bracketed")
                 .get_children("expression")
             ):
-                if col_ref := e.get_child("column_reference"):
+                col_ref = e.get_child("column_reference")
+                if col_ref:
                     src_col = Column(get_identifier(col_ref))
                     src_col.parent = direct_source
                     holder.add_column_lineage(src_col, insert_columns[j])
