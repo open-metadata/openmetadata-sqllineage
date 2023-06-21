@@ -68,10 +68,12 @@ class DmlInsertExtractor(LineageHolderExtractor):
                 # note regular subquery within SELECT statement is handled by DmlSelectExtractor, this is only to handle
                 # top-level subquery in DML like: 1) create table foo as (subquery); 2) insert into foo (subquery)
                 # subquery here isn't added as read source, and it inherits DML-level target_columns if parsed
-                if subquery_segment := get_child(segment, "select_statement"):
-                    self._extract_select(holder, subquery_segment)
-                elif subquery_segment := get_child(segment, "set_expression"):
-                    self._extract_set(holder, subquery_segment)
+                subquery_segment_select = get_child(segment, "select_statement")
+                subquery_segment_set = get_child(segment, "set_expression")
+                if subquery_segment_select:
+                    self._extract_select(holder, subquery_segment_select)
+                elif subquery_segment_set:
+                    self._extract_set(holder, subquery_segment_set)
             elif segment.type == "select_statement":
                 self._extract_select(holder, segment)
             elif segment.type == "set_expression":

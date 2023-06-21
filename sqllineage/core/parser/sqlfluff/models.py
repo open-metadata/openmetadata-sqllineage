@@ -116,20 +116,13 @@ class SqlFluffColumn(Column):
                         column_name = get_identifier(sub_segment)
                     elif sub_segment.type == "expression":
                         # special handling for postgres style type cast, col as target column name instead of col::type
-                        if len(sub2_segments := retrieve_segments(sub_segment)) == 1:
-                            if (
-                                sub2_segment := sub2_segments[0]
-                            ).type == "cast_expression":
-                                if (
-                                    len(
-                                        sub3_segments := retrieve_segments(sub2_segment)
-                                    )
-                                    == 2
-                                ):
-                                    if (
-                                        sub3_segment := sub3_segments[0]
-                                    ).type == "column_reference":
-                                        column_name = get_identifier(sub3_segment)
+                        sub2_segments = retrieve_segments(sub_segment)
+                        if len(sub2_segments) == 1:
+                            if (sub2_segments[0]).type == "cast_expression":
+                                sub3_segments = retrieve_segments(sub2_segments[0])
+                                if len(retrieve_segments(sub2_segments[0])) == 2:
+                                    if (sub3_segments[0]).type == "column_reference":
+                                        column_name = get_identifier(sub3_segments[0])
                 return Column(
                     column.raw if column_name is None else column_name,
                     source_columns=source_columns,
