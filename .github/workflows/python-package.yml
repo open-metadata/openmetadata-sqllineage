@@ -27,15 +27,13 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '16'
-    - name: Install OS dependency
+    - name: Install pip dependency
+      run: pip install tox codecov
+    - name: Script
       run: |
-         if [ "$RUNNER_OS" == "macOS" ]; then
-              brew install bzip2
+         if [ (matrix.os == 'macos-latest' && matrix.python-version != '3.7') || matrix.os != 'macos-latest' ]; then
+              tox -e py
          fi
       shell: bash
-    - name: Install pip dependency
-      run: pip install tox codecov bz2file
-    - name: Script
-      run: tox -e py
     - name: After Success
       run: codecov
