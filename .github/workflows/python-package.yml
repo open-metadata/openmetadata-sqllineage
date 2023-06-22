@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-11]
+        os: [macos-latest]
         python-version: ['3.7']
 
     steps:
@@ -27,8 +27,14 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '16'
+    - name: Install OS dependency
+      run: |
+         if [ "$RUNNER_OS" == "macOS" ]; then
+              brew install bzip2
+         fi
+      shell: bash
     - name: Install pip dependency
-      run: pip install tox codecov
+      run: pip install tox codecov bz2file
     - name: Script
       run: tox -e py
     - name: After Success
