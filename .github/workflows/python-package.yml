@@ -31,9 +31,9 @@ jobs:
       run: pip install tox codecov
     - name: Script
       run: |
-         if [ ( matrix.os == 'macos-latest' && matrix.python-version != '3.7' ) || matrix.os != 'macos-latest' ]; then
-              tox -e py
-         fi
+        if [ matrix.os == 'macos-latest' ] && [ matrix.python-version != '3.7' ] || [ matrix.os != 'macos-latest' ]; then
+          tox -e py
+        fi
       shell: bash
     - name: After Success
       run: codecov
