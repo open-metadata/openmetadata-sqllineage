@@ -5,6 +5,7 @@ from sqllineage.core.models import Path
 from sqllineage.core.parser.sqlfluff.handlers.base import ConditionalSegmentBaseHandler
 from sqllineage.core.parser.sqlfluff.holder_utils import retrieve_holder_data_from
 from sqllineage.core.parser.sqlfluff.models import (
+    SqlFluffColumn,
     SqlFluffTable,
 )
 from sqllineage.core.parser.sqlfluff.utils import (
@@ -22,7 +23,7 @@ class TargetHandler(ConditionalSegmentBaseHandler):
 
     def __init__(self) -> None:
         self.indicator = False
-        self.prev_token_like = False
+        self.prev_token_read = False
         self.prev_token_from = False
 
     TARGET_KEYWORDS = (
@@ -35,7 +36,7 @@ class TargetHandler(ConditionalSegmentBaseHandler):
         "DIRECTORY",
     )
 
-    LIKE_KEYWORD = "LIKE"
+    READ_KEYWORDS = {"LIKE", "CLONE"}
 
     FROM_KEYWORD = "FROM"
 
@@ -44,17 +45,17 @@ class TargetHandler(ConditionalSegmentBaseHandler):
         Check if the segment is a 'LIKE' or 'FROM' keyword
         :param segment: segment to be use for checking
         """
-        if segment.raw_upper == self.LIKE_KEYWORD:
-            self.prev_token_like = True
+        if segment.raw_upper in self.READ_KEYWORDS:
+            self.prev_token_read = True
 
         if segment.raw_upper == self.FROM_KEYWORD:
             self.prev_token_from = True
 
     def _reset_tokens(self) -> None:
         """
-        Set 'prev_token_like' and 'prev_token_like' variable to False
+        Set 'prev_token_from' and 'prev_token_read' variable to False
         """
-        self.prev_token_like = False
+        self.prev_token_read = False
         self.prev_token_from = False
 
     def indicate(self, segment: BaseSegment) -> bool:
@@ -81,7 +82,7 @@ class TargetHandler(ConditionalSegmentBaseHandler):
         """
         if segment.type == "table_reference":
             write_obj = SqlFluffTable.of(segment)
-            if self.prev_token_like:
+            if self.prev_token_read:
                 holder.add_read(write_obj)
             else:
                 holder.add_write(write_obj)
@@ -135,3 +136,18 @@ class TargetHandler(ConditionalSegmentBaseHandler):
                     )
                     if read:
                         holder.add_read(read)
+
+        elif segment.type == "bracketed":
+            """
+            In case of bracketed column reference, add these target columns to holder
+            so that when we compute the column level lineage
+            we keep these columns into consideration
+            """
+            sub_segments = retrieve_segments(segment)
+            if all(
+                sub_segment.type == "column_reference" for sub_segment in sub_segments
+            ):
+                # target columns only apply to bracketed column references
+                holder.add_target_column(
+                    *[SqlFluffColumn.of(sub_segment) for sub_segment in sub_segments]
+                )

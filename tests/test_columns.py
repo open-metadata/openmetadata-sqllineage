@@ -52,6 +52,16 @@ FROM tab2 a
     )
 
 
+def test_select_distinct_column():
+    sql = """INSERT INTO tab1
+SELECT DISTINCT col1
+FROM tab2"""
+    assert_column_lineage_equal(
+        sql,
+        [(ColumnQualifierTuple("col1", "tab2"), ColumnQualifierTuple("col1", "tab1"))],
+    )
+
+
 def test_select_column_using_function():
     sql = """INSERT INTO tab1
 SELECT max(col1),
@@ -212,6 +222,22 @@ FROM tab2"""
 
 
 def test_select_column_using_expression_in_parenthesis():
+    sql = """INSERT INTO tab1
+SELECT (col1 + col2)
+FROM tab2"""
+    assert_column_lineage_equal(
+        sql,
+        [
+            (
+                ColumnQualifierTuple("col1", "tab2"),
+                ColumnQualifierTuple("(col1 + col2)", "tab1"),
+            ),
+            (
+                ColumnQualifierTuple("col2", "tab2"),
+                ColumnQualifierTuple("(col1 + col2)", "tab1"),
+            ),
+        ],
+    )
     sql = """INSERT INTO tab1
 SELECT (col1 + col2) AS col3
 FROM tab2"""
@@ -706,6 +732,16 @@ def test_cast_using_constant():
     sql = """INSERT INTO tab1
 SELECT cast('2012-12-21' AS date) AS col2"""
     assert_column_lineage_equal(sql)
+
+
+def test_postgres_style_type_cast():
+    sql = """INSERT INTO tab1
+SELECT col1::timestamp
+FROM tab2"""
+    assert_column_lineage_equal(
+        sql,
+        [(ColumnQualifierTuple("col1", "tab2"), ColumnQualifierTuple("col1", "tab1"))],
+    )
 
 
 def test_window_function_in_subquery():
