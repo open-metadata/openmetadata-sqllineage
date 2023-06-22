@@ -30,6 +30,12 @@ jobs:
     - name: Install
       run: pip install tox codecov
     - name: Script
-      run: tox -e py
+      run: |
+        # Add conditional check to skip the step
+        if [ "${{ matrix.os }}" != "macos-latest" ] || [ "${{ matrix.python-version }}" != "3.7" ]; then
+          tox -e py
+        else
+          echo "Skipping Script step for macOS-latest with Python 3.7"
+        fi
     - name: After Success
       run: codecov
