@@ -37,5 +37,6 @@ jobs:
         else
           echo "Skipping Script step for macOS-latest with Python 3.7"
         fi
+      shell: bash
     - name: After Success
       run: codecov
