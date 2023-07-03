@@ -32,7 +32,6 @@ def extract_as_and_target_segment(
     """
     as_segment = segment.get_child("alias_expression")
     sublist = retrieve_segments(segment, False)
-    target = sublist[0] if is_subquery(sublist[0]) else sublist[0].segments[0]
     if is_subquery(sublist[0]):
         target = sublist[0]
     elif sublist[0].type == "bracketed":
