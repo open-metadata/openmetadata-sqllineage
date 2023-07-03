@@ -32,7 +32,12 @@ def extract_as_and_target_segment(
     """
     as_segment = segment.get_child("alias_expression")
     sublist = retrieve_segments(segment, False)
-    target = sublist[0] if is_subquery(sublist[0]) else sublist[0].segments[0]
+    if is_subquery(sublist[0]):
+        target = sublist[0]
+    elif sublist[0].type == "bracketed":
+        target = get_innermost_bracketed(sublist[0])
+    else:
+        target = sublist[0].segments[0]
     return as_segment, target
 
 
@@ -168,14 +173,20 @@ def get_inner_from_expression(segment: BaseSegment) -> BaseSegment:
     :param segment: segment to be processed
     :return: a list of segments from a 'from_expression' or 'from_expression_element' segment
     """
-    if segment.get_child("from_expression") and segment.get_child(
-        "from_expression"
-    ).get_child("from_expression_element"):
-        return segment.get_child("from_expression").get_child("from_expression_element")
+    if segment.get_child("from_expression"):
+        if segment.get_child("from_expression").get_child("from_expression_element"):
+            return segment.get_child("from_expression").get_child(
+                "from_expression_element"
+            )
+        if segment.get_child("from_expression").get_child("bracketed"):
+            innermost_bracketed = get_innermost_bracketed(
+                segment.get_child("from_expression").get_child("bracketed")
+            )
+            if innermost_bracketed.get_child("from_expression_element"):
+                return innermost_bracketed.get_child("from_expression_element")
     elif segment.get_child("from_expression_element"):
         return segment.get_child("from_expression_element")
-    else:
-        return segment
+    return segment
 
 
 def filter_segments_by_keyword(
