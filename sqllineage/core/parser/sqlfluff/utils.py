@@ -173,10 +173,17 @@ def get_inner_from_expression(segment: BaseSegment) -> BaseSegment:
     :param segment: segment to be processed
     :return: a list of segments from a 'from_expression' or 'from_expression_element' segment
     """
-    if segment.get_child("from_expression") and segment.get_child(
-        "from_expression"
-    ).get_child("from_expression_element"):
-        return segment.get_child("from_expression").get_child("from_expression_element")
+    if segment.get_child("from_expression"):
+        if segment.get_child("from_expression").get_child("from_expression_element"):
+            return segment.get_child("from_expression").get_child(
+                "from_expression_element"
+            )
+        if segment.get_child("from_expression").get_child("bracketed"):
+            innermost_bracketed = get_innermost_bracketed(
+                segment.get_child("from_expression").get_child("bracketed")
+            )
+            if innermost_bracketed.get_child("from_expression_element"):
+                return innermost_bracketed.get_child("from_expression_element")
     elif segment.get_child("from_expression_element"):
         return segment.get_child("from_expression_element")
     else:

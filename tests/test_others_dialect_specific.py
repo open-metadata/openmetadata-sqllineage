@@ -150,7 +150,7 @@ def test_uncache_table_if_exists(dialect: str):
 
 @pytest.mark.parametrize("dialect", ["hive"])
 def test_lateral_view_using_json_tuple(dialect: str):
-    # disabling this method for dialect "databricks", "sparksql" 
+    # disabling this method for dialect "databricks", "sparksql"
     # as sqlfluff produces incorrect tree for those cases
     sql = """INSERT OVERWRITE TABLE foo
 SELECT sc.id, q.item0, q.item1
