@@ -186,8 +186,7 @@ def get_inner_from_expression(segment: BaseSegment) -> BaseSegment:
                 return innermost_bracketed.get_child("from_expression_element")
     elif segment.get_child("from_expression_element"):
         return segment.get_child("from_expression_element")
-    else:
-        return segment
+    return segment
 
 
 def filter_segments_by_keyword(
