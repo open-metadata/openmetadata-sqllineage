@@ -1100,3 +1100,52 @@ SELECT col1 FROM dataset.tab2) SELECT col1 FROM temp_cte"""
             ),
         ],
     )
+
+
+def test_create_view_with_complex_sub_queries():
+    sql = """create view new_table as select col1 from (
+    select col1 from (
+        select c1 col1 from tab1
+        UNION
+        select c11 col1 from tab2
+    ) as my_tab_inner
+) as my_tab"""
+    assert_column_lineage_equal(
+        sql,
+        [
+            (
+                ColumnQualifierTuple("c1", "tab1"),
+                ColumnQualifierTuple("col1", "new_table"),
+            ),
+            (
+                ColumnQualifierTuple("c11", "tab2"),
+                ColumnQualifierTuple("col1", "new_table"),
+            ),
+        ],
+    )
+
+
+def test_sqlfluff_create_view_with_complex_sub_queries():
+    # sqlparse does not recognize the column definitions made for views
+    # for example cc1 column in this test
+    sql = """create view new_table (cc1) as select col1 from (
+    select col1 from (
+        select c1 col1 from tab1
+        UNION
+        select c11 col1 from tab2
+    ) as my_tab_inner
+) as my_tab"""
+    assert_column_lineage_equal(
+        sql,
+        [
+            (
+                ColumnQualifierTuple("c1", "tab1"),
+                ColumnQualifierTuple("cc1", "new_table"),
+            ),
+            (
+                ColumnQualifierTuple("c11", "tab2"),
+                ColumnQualifierTuple("cc1", "new_table"),
+            ),
+        ],
+        test_sqlparse=False,
+    )
