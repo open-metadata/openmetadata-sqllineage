@@ -270,13 +270,12 @@ def retrieve_segments(
     :param check_bracketed: process segment if it is of type "bracketed"
     :return: a list of segments
     """
-    if segment.type == "bracketed" and is_union(segment):
-        result = []
+    if segment.type == "bracketed":
         for sgmt in segment.segments:
             if sgmt.type == "set_expression":
-                result = [sgmt]
-        return result
-    elif segment.type == "bracketed" and check_bracketed:
+                return [sgmt]
+
+    if segment.type == "bracketed" and check_bracketed:
         segments = [
             sg
             for sg in segment.iter_segments(expanding=["expression"], pass_through=True)
@@ -290,8 +289,7 @@ def retrieve_segments(
                     if not is_segment_negligible(sg):
                         result.append(sg)
         return result
-    else:
-        return [sgmnt for sgmnt in segment.segments if not is_segment_negligible(sgmnt)]
+    return [sgmnt for sgmnt in segment.segments if not is_segment_negligible(sgmnt)]
 
 
 def get_identifier(col_segment: BaseSegment) -> str:
