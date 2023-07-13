@@ -1106,7 +1106,7 @@ def test_create_view_with_complex_sub_queries():
     sql = """create view new_table as select col1 from (
     select col1 from (
         select c1 col1 from tab1
-        UNION 
+        UNION
         select c11 col1 from tab2
     ) as my_tab_inner
 ) as my_tab"""
@@ -1131,7 +1131,7 @@ def test_sqlfluff_create_view_with_complex_sub_queries():
     sql = """create view new_table (cc1) as select col1 from (
     select col1 from (
         select c1 col1 from tab1
-        UNION 
+        UNION
         select c11 col1 from tab2
     ) as my_tab_inner
 ) as my_tab"""
