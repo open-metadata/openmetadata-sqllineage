@@ -252,7 +252,11 @@ def find_table_identifier(identifier: BaseSegment) -> Optional[BaseSegment]:
     table_identifier = None
     if identifier.segments:
         for segment in identifier.segments:
-            if segment.type in ("table_reference", "file_reference"):
+            if segment.type in (
+                "table_reference",
+                "file_reference",
+                "object_reference",
+            ):
                 return segment
             else:
                 table_identifier = find_table_identifier(segment)
