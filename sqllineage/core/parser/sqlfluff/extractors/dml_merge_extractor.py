@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, no_type_check
 
 from sqlfluff.core.parser import BaseSegment
 
@@ -30,6 +30,7 @@ class DmlMergeExtractor(LineageHolderExtractor):
     def __init__(self, dialect: str):
         super().__init__(dialect)
 
+    @no_type_check  # to ignore warning `Call to untyped function "get_child" in typed context`
     def extract(
         self,
         statement: BaseSegment,
