@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, no_type_check
 
 from sqlfluff.core.parser import BaseSegment
 
@@ -30,6 +30,7 @@ class DmlMergeExtractor(LineageHolderExtractor):
     def __init__(self, dialect: str):
         super().__init__(dialect)
 
+    @no_type_check  # to ignore warning `Call to untyped function "get_child" in typed context`
     def extract(
         self,
         statement: BaseSegment,
@@ -110,13 +111,15 @@ class DmlMergeExtractor(LineageHolderExtractor):
                     tgt_col.parent = list(holder.write)[0]
                     insert_columns.append(tgt_col)
                 for j, e in enumerate(
-                    merge_insert.get_child("values_clause")
-                    .get_child("bracketed")
-                    .get_children("expression")
+                    retrieve_segments(
+                        merge_insert.get_child("values_clause").get_child("bracketed"),
+                        check_bracketed=False,
+                    )
                 ):
-                    col_ref = e.get_child("column_reference")
-                    if col_ref:
-                        src_col = Column(get_identifier(col_ref))
-                        src_col.parent = direct_source
-                        holder.add_column_lineage(src_col, insert_columns[j])
+                    if e.type == "expression":
+                        col_ref = e.get_child("column_reference")
+                        if col_ref:
+                            src_col = Column(get_identifier(col_ref))
+                            src_col.parent = direct_source
+                            holder.add_column_lineage(src_col, insert_columns[j])
         return holder
